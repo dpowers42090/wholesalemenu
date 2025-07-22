@@ -1,33 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Embedded Google Sheet</title>
   <style>
-  html, body {
-    margin: 0; height: 100%;
-  }
-  .sheet-container {
-    position: relative;
-    width: 100%;
-    height: 80vh;
-    overflow: hidden;
-  }
-  .sheet-container iframe {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    border: none;
-  }
-</style>
+    /* Make html/body fill the viewport */
+    html, body {
+      margin: 0;
+      height: 100%;
+    }
+
+    /* Give the container a viewport‑based height */
+    .sheet-container {
+      width: 100%;
+      height: 80vh;      /* << change this value as needed */
+      overflow: hidden;
+    }
+
+    /* Make the iframe fill its container */
+    .sheet-container iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
 </head>
 <body>
-  <h1 style="text-align:center;">My Google Sheet</h1>
+  <h1 style="text-align: center; margin: 0.5em 0;">My Google Sheet</h1>
   <div class="sheet-container">
-    <iframe 
-      src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQaEtCECClItFOJuGcyfporW-4sGimqVBRuqGdV5DWQCzogiZB-wBTnUDlB44rQlA/pubhtml?widget=true&amp;headers=false">
-    </iframe>
+    <iframe
+      src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQaEtCECClItFOJuGcyfporW-4sGimqVBRuqGdV5DWQCzogiZB-wBTnUDlB44rQlA/pubhtml?widget=true&amp;headers=false"
+      scrolling="yes"
+    ></iframe>
   </div>
 </body>
 </html>
