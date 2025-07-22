@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Auto‑Scaling Google Sheet</title>
+  <title>Auto-Scaling Google Sheet</title>
   <style>
-    /* Full‑screen flex layout */
+    /* ─── full-screen flex layout ───────────────────────────────── */
     html, body {
       margin: 0;
       padding: 0;
       height: 100vh;
       width: 100vw;
-      overflow: hidden;
+      overflow: hidden;    /* no outer scrollbars */
       font-family: sans-serif;
     }
     .wrapper {
@@ -30,13 +30,13 @@
     #container {
       position: relative;
       flex: 1 1 auto;
-      overflow: hidden;
+      overflow: hidden;    /* clip the scaled iframe exactly */
     }
-    /* The iframe will be reset to its native size, then scaled */
+
+    /* ─── iframe scaling ────────────────────────────────────────── */
     #sheet {
       position: absolute;
-      top: 0;
-      left: 0;
+      top: 0; left: 0;
       border: none;
       transform-origin: 0 0;
     }
@@ -46,6 +46,9 @@
   <div class="wrapper">
     <header>My Google Sheet</header>
     <div id="container">
+      <!-- 
+        1) This is your embed link, unchanged:
+      -->
       <iframe
         id="sheet"
         src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQaEtCECClItFOJuGcyfporW-4sGimqVBRuqGdV5DWQCzogiZB-wBTnUDlB44rQlA/pubhtml?widget=true&amp;headers=false"
@@ -60,22 +63,29 @@
       const iframe  = document.getElementById('sheet');
       const wrapper = document.getElementById('container');
 
-      // Native dimensions from the attributes above:
+      // ─── grab the "native" size you just dropped into the tag above ───
       const ORIGINAL_WIDTH  = parseInt(iframe.getAttribute('width'),  10);
       const ORIGINAL_HEIGHT = parseInt(iframe.getAttribute('height'), 10);
 
       function fit() {
+        // how much room we actually have right now
         const W = wrapper.clientWidth;
         const H = wrapper.clientHeight;
+        // pick the smaller scale so it never overflows
         const scale = Math.min(W / ORIGINAL_WIDTH, H / ORIGINAL_HEIGHT);
-        iframe.style.width     = ORIGINAL_WIDTH  + 'px';
-        iframe.style.height    = ORIGINAL_HEIGHT + 'px';
+        // reset the iframe back to its native pixels…
+        iframe.style.width  = ORIGINAL_WIDTH  + 'px';
+        iframe.style.height = ORIGINAL_HEIGHT + 'px';
+        // …then shrink it via CSS transform
         iframe.style.transform = 'scale(' + scale + ')';
       }
 
-      window.addEventListener('load',  fit);
+      // run on initial load…
+      window.addEventListener('load', fit);
+      // …and again whenever the user rotates or resizes
       window.addEventListener('resize', fit);
     })();
   </script>
 </body>
 </html>
+
