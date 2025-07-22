@@ -11,7 +11,7 @@
       padding: 0;
       height: 100vh;
       width: 100vw;
-      overflow: hidden;    /* prevent outer scrolling */
+      overflow: hidden;
       font-family: sans-serif;
     }
     .wrapper {
@@ -30,7 +30,7 @@
     #container {
       position: relative;
       flex: 1 1 auto;
-      overflow: hidden;    /* prevent inner scrolling */
+      overflow: hidden;
     }
     /* The iframe will be reset to its native size, then scaled */
     #sheet {
@@ -46,10 +46,6 @@
   <div class="wrapper">
     <header>My Google Sheet</header>
     <div id="container">
-      <!--
-        1) Replace YOUR_SHEET_ID below with your sheet’s ID (from the Publish→Embed URL).
-        2) Replace width="1200" and height="800" with the exact values you choose or measure.
-      -->
       <iframe
         id="sheet"
         src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQaEtCECClItFOJuGcyfporW-4sGimqVBRuqGdV5DWQCzogiZB-wBTnUDlB44rQlA/pubhtml?widget=true&amp;headers=false"
@@ -64,23 +60,19 @@
       const iframe  = document.getElementById('sheet');
       const wrapper = document.getElementById('container');
 
-      // Read the native width & height from the attributes
+      // Native dimensions from the attributes above:
       const ORIGINAL_WIDTH  = parseInt(iframe.getAttribute('width'),  10);
       const ORIGINAL_HEIGHT = parseInt(iframe.getAttribute('height'), 10);
 
       function fit() {
-        // Available space
         const W = wrapper.clientWidth;
         const H = wrapper.clientHeight;
-        // Scale so neither dimension overflows
         const scale = Math.min(W / ORIGINAL_WIDTH, H / ORIGINAL_HEIGHT);
-        // Reset to native size then apply scale
         iframe.style.width     = ORIGINAL_WIDTH  + 'px';
         iframe.style.height    = ORIGINAL_HEIGHT + 'px';
         iframe.style.transform = 'scale(' + scale + ')';
       }
 
-      // Run on load and on every resize
       window.addEventListener('load',  fit);
       window.addEventListener('resize', fit);
     })();
