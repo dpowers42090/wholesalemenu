@@ -3,73 +3,72 @@
 <head>
   <meta charset="UTF-8" />  
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pinch‑Resizable Google Sheet</title>
-  <!-- Bootstrap CSS -->
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  />
-  <!-- Hammer.js for pinch gestures -->
-  <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+  <title>Auto-Scaling Google Sheet</title>
   <style>
     html, body {
-      margin: 0; height: 100%; overflow: hidden;
-      font-family: sans-serif;
+      margin:0; padding:0;
+      width:100vw; height:100vh;
+      overflow:hidden;
+      font-family:sans-serif;
     }
     header {
-      height: 50px; line-height: 50px;
-      text-align: center; background: #f5f5f5;
-      border-bottom: 1px solid #ddd;
+      height:50px;
+      line-height:50px;
+      text-align:center;
+      background:#f5f5f5;
+      border-bottom:1px solid #ddd;
     }
-    #sheet-container {
-      position: relative;
-      width: 100%; height: calc(100vh - 50px);
-      touch-action: none;      /* capture pinch instead of page zoom */
-      overflow: hidden;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-      transform-origin: 0 0;   /* scale from top‑left by default */
-      transition: transform 0.05s ease-out;
+    /* wrapper fills everything under the header */
+    #wrapper {
+      position:relative;
+      width:100%;
+      height:calc(100% - 50px);
+      overflow:hidden;
     }
-    #sheet-container iframe {
-      position: absolute; top: 0; left: 0;
-      width: 100%; height: 100%;
-      border: none;
+    /* iframe will be transformed to fit */
+    #sheet {
+      border:none;
+      transform-origin:top left;
+      position:absolute; top:0; left:0;
     }
   </style>
 </head>
 <body>
   <header>My Google Sheet</header>
-
-  <div id="sheet-container">
+  <div id="wrapper">
     <iframe
-      src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQaEtCECClItFOJuGcyfporW-4sGimqVBRuqGdV5DWQCzogiZB-wBTnUDlB44rQlA/pubhtml?widget=true&amp;headers=false"
-      scrolling="yes"
+      id="sheet"
+      src="https://docs.google.com/spreadsheets/d/e/…/pubhtml?widget=true&amp;headers=false"
     ></iframe>
   </div>
 
   <script>
-    // Initialize Hammer on the container
-    const container = document.getElementById('sheet-container');
-    const mc = new Hammer.Manager(container);
-    mc.add(new Hammer.Pinch());
+    (function(){
+      const iframe = document.getElementById('sheet');
+      const wrap   = document.getElementById('wrapper');
 
-    let currentScale = 1;
-    let startScale = 1;
+      // ←– paste your numbers here
+      const ORIGINAL_WIDTH  = 1200;
+      const ORIGINAL_HEIGHT = 800;
 
-    mc.on('pinchstart', e => {
-      startScale = currentScale;
-    });
+      function fit() {
+        // how much space do we actually have?
+        const W = wrap.clientWidth;
+        const H = wrap.clientHeight;
 
-    mc.on('pinchmove', e => {
-      // Calculate new scale, clamped between 0.5× and 3×
-      currentScale = Math.max(0.5, Math.min(startScale * e.scale, 3));
-      // Use the pinch center as transform-origin for natural zoom
-      container.style.transformOrigin =
-        (e.center.x - container.getBoundingClientRect().left) + 'px '
-        + (e.center.y - container.getBoundingClientRect().top) + 'px';
-      container.style.transform = 'scale(' + currentScale + ')';
-    });
+        // pick the smaller scale so we never overflow
+        const scale = Math.min(W/ORIGINAL_WIDTH, H/ORIGINAL_HEIGHT);
+
+        // size the iframe to its original pixels…
+        iframe.style.width  = ORIGINAL_WIDTH  + 'px';
+        iframe.style.height = ORIGINAL_HEIGHT + 'px';
+        // …then scale it down
+        iframe.style.transform = 'scale(' + scale + ')';
+      }
+
+      window.addEventListener('resize', fit);
+      fit();  // initial call
+    })();
   </script>
 </body>
 </html>
