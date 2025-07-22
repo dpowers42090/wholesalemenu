@@ -3,72 +3,92 @@
 <head>
   <meta charset="UTF-8" />  
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Auto-Scaling Google Sheet</title>
+  <title>Auto-Fit Google Sheet</title>
   <style>
+    /* ----------------------------------------
+       full‑screen flex layout
+    ---------------------------------------- */
     html, body {
-      margin:0; padding:0;
-      width:100vw; height:100vh;
-      overflow:hidden;
-      font-family:sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;    /* outer scroll prevented */
+      font-family: sans-serif;
+    }
+    .wrapper {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
     }
     header {
-      height:50px;
-      line-height:50px;
-      text-align:center;
-      background:#f5f5f5;
-      border-bottom:1px solid #ddd;
+      flex: 0 0 50px;
+      background: #f5f5f5;
+      border-bottom: 1px solid #ddd;
+      text-align: center;
+      line-height: 50px;
+      font-size: 1rem;
     }
-    /* wrapper fills everything under the header */
-    #wrapper {
-      position:relative;
-      width:100%;
-      height:calc(100% - 50px);
-      overflow:hidden;
+    #container {
+      position: relative;
+      flex: 1 1 auto;
+      overflow: hidden;    /* inner scroll prevented */
     }
-    /* iframe will be transformed to fit */
+
+    /* ----------------------------------------
+       iframe gets transformed
+    ---------------------------------------- */
     #sheet {
-      border:none;
-      transform-origin:top left;
-      position:absolute; top:0; left:0;
+      position: absolute;
+      top: 0; left: 0;
+      border: none;
+      transform-origin: 0 0; /* scale from top‑left corner */
     }
   </style>
 </head>
 <body>
-  <header>My Google Sheet</header>
-  <div id="wrapper">
-    <iframe
-      id="sheet"
-      src="https://docs.google.com/spreadsheets/d/e/…/pubhtml?widget=true&amp;headers=false"
-    ></iframe>
+  <div class="wrapper">
+    <header>My Google Sheet</header>
+    <div id="container">
+      <!--
+        Replace the width/height/src below with your
+        Publish→Embed values!
+      -->
+      <iframe
+        id="sheet"
+        src="https://docs.google.com/spreadsheets/d/e/YOUR_SHEET_ID/pubhtml?widget=true&amp;headers=false"
+        width="1200"
+        height="800"
+      ></iframe>
+    </div>
   </div>
 
   <script>
     (function(){
-      const iframe = document.getElementById('sheet');
-      const wrap   = document.getElementById('wrapper');
-
-      // ←– paste your numbers here
-      const ORIGINAL_WIDTH  = 1200;
-      const ORIGINAL_HEIGHT = 800;
+      const iframe   = document.getElementById('sheet');
+      const wrapper  = document.getElementById('container');
+      // read the original pixels from the tag
+      const ORIGINAL_WIDTH  = parseInt(iframe.getAttribute('width'),  10);
+      const ORIGINAL_HEIGHT = parseInt(iframe.getAttribute('height'), 10);
 
       function fit() {
-        // how much space do we actually have?
-        const W = wrap.clientWidth;
-        const H = wrap.clientHeight;
-
-        // pick the smaller scale so we never overflow
+        // how much space do we have now?
+        const W = wrapper.clientWidth;
+        const H = wrapper.clientHeight;
+        // compute the scale so nothing overflows
         const scale = Math.min(W/ORIGINAL_WIDTH, H/ORIGINAL_HEIGHT);
-
-        // size the iframe to its original pixels…
+        // set the iframe’s CSS size back to its native pixels…
         iframe.style.width  = ORIGINAL_WIDTH  + 'px';
         iframe.style.height = ORIGINAL_HEIGHT + 'px';
-        // …then scale it down
+        // …then shrink with transform
         iframe.style.transform = 'scale(' + scale + ')';
       }
 
+      // run once on load, and again on every resize
+      window.addEventListener('load', fit);
       window.addEventListener('resize', fit);
-      fit();  // initial call
     })();
   </script>
 </body>
 </html>
+
