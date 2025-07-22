@@ -3,89 +3,95 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Auto-Scaling Google Sheet</title>
+  <title>Auto‐Fit Google Sheet</title>
   <style>
-    /* ─── full-screen flex layout ───────────────────────────────── */
+    /* strip out all outer margins */
     html, body {
       margin: 0;
       padding: 0;
-      height: 100vh;
-      width: 100vw;
-      overflow: hidden;    /* no outer scrollbars */
-      font-family: sans-serif;
     }
-    .wrapper {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-    }
+    /* simple header */
     header {
-      flex: 0 0 50px;
+      width: 100%;
+      height: 50px;
+      line-height: 50px;
       background: #f5f5f5;
       border-bottom: 1px solid #ddd;
       text-align: center;
-      line-height: 50px;
+      font-family: sans-serif;
       font-size: 1rem;
     }
+    /* container will get its height set in JS to exactly match the scaled sheet */
     #container {
       position: relative;
-      flex: 1 1 auto;
-      overflow: hidden;    /* clip the scaled iframe exactly */
+      width: 100%;
+      overflow: hidden;
     }
-
-    /* ─── iframe scaling ────────────────────────────────────────── */
+    /* iframe will be reset to its native size then scaled down */
     #sheet {
       position: absolute;
-      top: 0; left: 0;
+      top: 0;
+      left: 0;
       border: none;
       transform-origin: 0 0;
     }
   </style>
 </head>
 <body>
-  <div class="wrapper">
-    <header>My Google Sheet</header>
-    <div id="container">
-      <!-- 
-        1) This is your embed link, unchanged:
-      -->
-      <iframe
-        id="sheet"
-        src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQaEtCECClItFOJuGcyfporW-4sGimqVBRuqGdV5DWQCzogiZB-wBTnUDlB44rQlA/pubhtml?widget=true&amp;headers=false"
-        width="1200"
-        height="800"
-      ></iframe>
-    </div>
+
+  <header>My Google Sheet</header>
+  <div id="container">
+    <!--
+      1) Your published embed URL goes here (unchanged).
+      2) width="1200" height="800" should match the numbers you pick or measure
+         from your Publish→Embed snippet or DevTools.
+    -->
+    <iframe
+      id="sheet"
+      src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQaEtCECClItFOJuGcyfporW-4sGimqVBRuqGdV5DWQCzogiZB-wBTnUDlB44rQlA/pubhtml?widget=true&amp;headers=false"
+      width="1200"
+      height="800"
+    ></iframe>
   </div>
 
   <script>
     (function(){
-      const iframe  = document.getElementById('sheet');
-      const wrapper = document.getElementById('container');
+      const iframe   = document.getElementById('sheet');
+      const container = document.getElementById('container');
+      const header   = document.querySelector('header');
 
-      // ─── grab the "native" size you just dropped into the tag above ───
+      // Read the “native” size you specified above:
       const ORIGINAL_WIDTH  = parseInt(iframe.getAttribute('width'),  10);
       const ORIGINAL_HEIGHT = parseInt(iframe.getAttribute('height'), 10);
 
       function fit() {
-        // how much room we actually have right now
-        const W = wrapper.clientWidth;
-        const H = wrapper.clientHeight;
-        // pick the smaller scale so it never overflows
-        const scale = Math.min(W / ORIGINAL_WIDTH, H / ORIGINAL_HEIGHT);
-        // reset the iframe back to its native pixels…
+        // 1) Available viewport width
+        const vpW = window.innerWidth;
+        // 2) Available viewport height minus header
+        const hdrH = header.getBoundingClientRect().height;
+        const vpH = window.innerHeight - hdrH;
+
+        // 3) Compute the scale so sheet never overflows
+        const scale = Math.min(vpW / ORIGINAL_WIDTH, vpH / ORIGINAL_HEIGHT);
+
+        // 4) Resize container to *exactly* the scaled sheet height
+        //    width: 100% of viewport
+        container.style.height = (ORIGINAL_HEIGHT * scale) + 'px';
+
+        // 5) Reset iframe back to its native pixels…
         iframe.style.width  = ORIGINAL_WIDTH  + 'px';
         iframe.style.height = ORIGINAL_HEIGHT + 'px';
-        // …then shrink it via CSS transform
+        // …then scale it down to fit
         iframe.style.transform = 'scale(' + scale + ')';
       }
 
-      // run on initial load…
+      // Fit on load and on every resize/orientation change:
       window.addEventListener('load', fit);
-      // …and again whenever the user rotates or resizes
       window.addEventListener('resize', fit);
     })();
   </script>
+
 </body>
 </html>
+
 
